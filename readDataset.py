@@ -10,3 +10,6 @@ def readData():
     xesDataframe = xes_converter.apply(log, variant=xes_converter.Variants.TO_DATA_FRAME)
     return xesDataframe
     #df = pd.read_csv("bpi_challenge_2017.csv")
+
+def readfinishedLog():
+    df = pd.read_csv("bpi2017_finishedCases.csv")
