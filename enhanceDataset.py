@@ -10,27 +10,27 @@ def add_No_Of_Offers(log):
 
 def addTreatment(log):
     # case should be marked as treated if it receives more than one offer
-
     def check_NoOfOffers(gr):
         df = pd.DataFrame(gr)
-        
-        # case should be not treated if it receives more than one offer
-        if  list(df['NumberOfOffers'])[0] <= 1:
-            df['treatment'] = "treat"  # T=1
+        if  list(df['NumberOfOffers'])[0] <= 2:
+            df['treatment'] = "notTreated"  # T=1
         else:
-            df['treatment'] = "noTreat" # T=0
+            df['treatment'] = "treated" # T=0
         return df
-    
-
     # add new treatment for each case based on number of offers
     # cases with only one offer should be treated
-    df = log.groupby('case:concept:name').apply(check_NoOfOffers)
-    df = df.reset_index(drop=True)
-    return df
+    treatedLog = log.groupby('case:concept:name').apply(check_NoOfOffers)
+    treatedLog = treatedLog.reset_index(drop=True)
+    return treatedLog
 
+def addSuccessColumns(log):
+    # if case includes A_Pending than column successful = 1, else 0
+    # make column treatmentSuccess, here treated and if successfull Yes, else No
 
 #TODO: add column successfull or not successful
 
 def enhancement(finishedCases):
     offersLog = add_No_Of_Offers(finishedCases)
-    addTreatment(offersLog)
+    treatedLog = addTreatment(offersLog)
+    # sucessLog = addSuccessColumns(treatedLog)
+    return treatedLog
