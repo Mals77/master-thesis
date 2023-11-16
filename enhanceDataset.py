@@ -12,7 +12,7 @@ def addTreatment(log):
     # case should be marked as treated if it receives more than one offer
     def check_NoOfOffers(gr):
         df = pd.DataFrame(gr)
-        if  list(df['NumberOfOffers'])[0] <= 2:
+        if  list(df['NumberOfOffers'])[0] <= 1:
             df['treatment'] = "notTreated"  # T=1
         else:
             df['treatment'] = "treated" # T=0
@@ -29,6 +29,7 @@ def addSuccessColumns(log):
     # make column treatmentSuccess, here treated and if successfull Yes, else No
     log['treatmentSuccess'] = log.apply(lambda row: 'Yes' if row['treatment'] == 'treated' and row['successful'] == 1 else 'No' if row['treatment'] == 'treated' and row['successful'] == 0 else '', axis=1)
     #log['treatmentSuccess'] = log.groupby('case:concept:name').apply(lambda group: "Yes" if ('treated' in group['treatment'].values) and ('successful' == 1) else "No" if ('treated' in group['treatment'].values) else '').reset_index(level=0, drop=True)
+    log.loc[log['NumberOfOffers'] == 1, 'treatmentSuccess'] = 0
     return log
 
 def enhancement(finishedCases):

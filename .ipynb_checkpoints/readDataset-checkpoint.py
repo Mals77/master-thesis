@@ -14,3 +14,7 @@ def readData():
 def readfinishedLog():
     df = pd.read_csv("bpi2017_finishedCases.csv")
     return df
+
+def readEnhancedData():
+    df = pd.read_csv("bpi2017_enhancedData.csv")
+    return df
