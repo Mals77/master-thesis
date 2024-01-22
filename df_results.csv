@@ -1,0 +1,14 @@
+method,ATE,ITE,Library,other
+Linear Regression,0.44904557401739986,,DoWhy,
+Double ML,0.47098235901868063,"[[0.        ]
+ [0.        ]
+ [0.        ]
+ ...
+ [0.95210653]
+ [0.95210653]
+ [0.95210653]]",DoWhy,
+IPW,0.3113522997394646,,DoWhy,
+IPW Hajek,0.3113522997394638,,DoWhy,
+IPW Stabalized,0.3113522997394641,,DoWhy,
+Propensity Score Matching,-0.17928865352214227,,DoWhy,
+Distance Matching,0.6303219106957425,,DoWhy,
