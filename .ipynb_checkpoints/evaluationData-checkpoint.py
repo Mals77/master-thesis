@@ -7,7 +7,7 @@ def bpi2017Features(df_final):
     features = df_final[['NumberOfOffers', 'Action', 'org:resource',
        'concept:name', 'EventOrigin', 'lifecycle:transition', 'time:timestamp',
        'case:LoanGoal', 'case:ApplicationType', 'case:RequestedAmount',
-       'FirstWithdrawalAmount', 'NumberOfTerms', 'Accepted', 'MonthlyCost', 'Selected',
+       'FirstWithdrawalAmount', 'NumberOfTerms', 'Accepted', 'MonthlyCost',
        'CreditScore', 'OfferedAmount', 'offerNumber','timeApplication', 'weekdayApplication']]
     y=df_final['offerSuccess']
     return features, treatment, y
@@ -15,11 +15,14 @@ def bpi2017Features(df_final):
 def placeboTreatment(data):
     """Replaces the treatment variable with a new variable randomly generated."""
     inference_features, treatment_col, outcome_col = bpi2017Features(data)
-    num_rows = data.df.shape[0]
+    num_rows = data.shape[0]
+    data['treatmentOffer'] = np.random.randint(2, size=num_rows)
 
-    X = data.df[data[inference_features]].values
-    treatment_new = np.random.randint(2, size=num_rows)
-    y = data.df[data.outcome_col].values
+    X = inference_features
+    treatment_new = data['treatmentOffer']
+    y = outcome_col
+
+    data = pd.concat([inference_features, treatment_col, data['treatmentOffer']], axis=1)
 
     return data, X, y, treatment_new
 
@@ -28,13 +31,16 @@ def placeboTreatment(data):
 def randomCause(data):
     inference_features, treatment_col, outcome_col = bpi2017Features(data)
     """Adds an irrelevant random covariate to the dataframe."""
-    num_rows = data.df.shape[0]
+    num_rows = data.shape[0]
     new_data = np.random.randn(num_rows)
 
-    X = data.df[data[inference_features]].values
-    treatment = data.df[data.treatment_col].values
-    y = data.df[data.outcome_col].values
-    X_new = np.hstack((X, new_data.reshape((-1, 1))))
+    inference_features['random covariate'] = new_data
+
+    X_new = inference_features
+    treatment = treatment_col
+    y = outcome_col
+
+    data = pd.concat([treatment_col, treatment_col, X_new], axis=1)
 
     return data, X_new, y, treatment
 
@@ -50,23 +56,54 @@ def randomReplace(data):
 
     new_df = pd.concat([inference_features, treatment_col, outcome_col], axis=1)
 
-    X_new = inference_features.values
-    treatment_new = treatment_col.values
-    y_new = outcome_col.values
+    X_new = inference_features
+    treatment_new = treatment_col
+    y_new = outcome_col
 
     return new_df, X_new, y_new, treatment_new, replaced_feature
 
 
     
 def randomSubsetData(data):
-    inference_features, treatment_col, outcome_col = bpi2017Features(data)
     """Takes a random subset of size sample_size of the data."""
-    #sample_size is between 0.7 and 0.95 of orginal dataset
-    sample_size = random.uniform(0.7, 0.95)
-    df_new = data.df.sample(frac=data.sample_size).copy()
+    #sample_size is between 0.4 and 0.95 of orginal dataset
+    sample_size = random.uniform(0.4, 0.95)
+    df_new = data.sample(frac=sample_size).copy()
 
-    X_new = df_new[data.inference_features].values
-    treatment_new = df_new[data.treatment_col].values
-    y_new = df_new[data.outcome_col].values
+    inference_features, treatment_col, outcome_col = bpi2017Features(df_new)
+
+    X_new = inference_features
+    treatment_new = treatment_col
+    y_new = outcome_col
 
     return df_new, X_new, y_new, treatment_new
+
+def makeReplacedDatasets(n, df):
+    for i in range(1, n + 1):
+        replaced_df, X, y, t, f  = randomReplace(df)
+        replaced_df.to_csv(f'./evaluationDatasets/Replace/randomReplacedDataset{i}.csv', index=False)
+
+def makeSubsetDatasets(n, df):
+    for i in range(1, n + 1):
+        subset_df, X, y, t = randomSubsetData(df)
+        subset_df.to_csv(f'./evaluationDatasets/Subset/randomSubsetDataset{i}.csv', index=False)
+
+def makePlaceborDatasets(n, df):
+    for i in range(1, n + 1):
+        placebo_df, X, y, t  = placeboTreatment(df)
+        placebo_df.to_csv(f'./evaluationDatasets/Placebo/placeboDataset{i}.csv', index=False)
+
+def makeCauseDataset(n, df):
+    for i in range(1, n + 1):
+        cause_df, X, y, t  = placeboTreatment(df)
+        cause_df.to_csv(f'./evaluationDatasets/Cause/addRandomCauseDataset{i}.csv', index=False)
+
+if __name__ == '__main__':
+    #make the random evaluation datasets and save them as csv
+    #1 for placebo, 1 for randomCause, 10 for randomReplace, 10 for randomSubset
+    df = pd.read_csv("bpi2017_final.csv")
+    makeSubsetDatasets(10, df)
+    makeReplacedDatasets(10, df)
+    makePlaceborDatasets(2, df)
+    makeCauseDataset(2, df)
+    
