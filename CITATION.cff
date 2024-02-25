@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Skiera"
+  given-names: "Malou C."
+title: "Master Thesis Code"
+version: 1.0.0
+date-released: 2024-04-05
+url: "https://github.com/Mals77/master-thesis"
