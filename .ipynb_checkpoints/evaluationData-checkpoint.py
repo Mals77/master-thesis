@@ -2,6 +2,8 @@ import random
 import numpy as np
 import pandas as pd
 
+#TODO: input random Cause and replace per offer and not new value for every row!
+
 def bpi2017Features(df_final):
     treatment=df_final['treatmentOffer']
     features = df_final[['NumberOfOffers', 'Action', 'org:resource',
@@ -66,8 +68,8 @@ def randomReplace(data):
     
 def randomSubsetData(data):
     """Takes a random subset of size sample_size of the data."""
-    #sample_size is between 0.4 and 0.95 of orginal dataset
-    sample_size = random.uniform(0.4, 0.95)
+    #sample_size is between 0.4 and 0.85 of orginal dataset
+    sample_size = random.uniform(0.4, 0.85)
     df_new = data.sample(frac=sample_size).copy()
 
     inference_features, treatment_col, outcome_col = bpi2017Features(df_new)
