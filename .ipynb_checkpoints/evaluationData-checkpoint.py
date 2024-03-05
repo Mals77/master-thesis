@@ -2,8 +2,6 @@ import random
 import numpy as np
 import pandas as pd
 
-#TODO: input random Cause and replace per offer and not new value for every row!
-
 def bpi2017Features(df_final):
     treatment=df_final['treatmentOffer']
     features = df_final[['NumberOfOffers', 'Action', 'org:resource',
@@ -17,14 +15,19 @@ def bpi2017Features(df_final):
 def placeboTreatment(data):
     """Replaces the treatment variable with a new variable randomly generated."""
     inference_features, treatment_col, outcome_col = bpi2017Features(data)
-    num_rows = data.shape[0]
-    data['treatmentOffer'] = np.random.randint(2, size=num_rows)
+    #num_rows = data.shape[0]
+    #data['treatmentOffer'] = np.random.randint(2, size=num_rows)
+
+    unique_case_ids = data['case:concept:name'].unique()
+    random_values = np.random.randint(2, size=len(unique_case_ids))
+    case_random_map = dict(zip(unique_case_ids, random_values))
+    data['treatmentOffer'] = data['case:concept:name'].map(case_random_map)
 
     X = inference_features
     treatment_new = data['treatmentOffer']
     y = outcome_col
 
-    data = pd.concat([inference_features, treatment_col, data['treatmentOffer']], axis=1)
+    data = pd.concat([inference_features, treatment_new, y], axis=1)
 
     return data, X, y, treatment_new
 
@@ -33,16 +36,21 @@ def placeboTreatment(data):
 def randomCause(data):
     inference_features, treatment_col, outcome_col = bpi2017Features(data)
     """Adds an irrelevant random covariate to the dataframe."""
-    num_rows = data.shape[0]
-    new_data = np.random.randn(num_rows)
+    # num_rows = data.shape[0]
+    # new_data = np.random.randn(num_rows)
+    # inference_features['random covariate'] = new_data
 
-    inference_features['random covariate'] = new_data
+    num_unique_cases = len(data['case:concept:name'].unique())
+    # Generate random data for each unique caseID
+    new_data = np.random.randn(num_unique_cases)
+    # Map random data to each caseID
+    inference_features['random covariate'] = data['case:concept:name'].map(dict(zip(sorted(data['case:concept:name'].unique()),new_data)))
 
     X_new = inference_features
     treatment = treatment_col
     y = outcome_col
 
-    data = pd.concat([treatment_col, treatment_col, X_new], axis=1)
+    data = pd.concat([treatment_col, outcome_col, X_new], axis=1)
 
     return data, X_new, y, treatment
 
